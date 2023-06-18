@@ -2,14 +2,10 @@ import { useState } from 'react'
 import './App.css'
 import Movies from './componentes/Movies'
 import { useMovies } from './hooks/useMovies'
-import { useEffect } from 'react'
-
-const BASE_URL = 'http://www.omdbapi.com'
-const API_KEY = 'bba0f986'
 
 function App() {
-  const { movies } = useMovies()
-  const [searchText, setSearchText] = useState()
+  const [searchText, setSearchText] = useState('')
+  const { movies, error } = useMovies(searchText)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -17,17 +13,6 @@ function App() {
     const { search } = Object.fromEntries(formData)
     setSearchText(search)
   }
-
-  useEffect(() => {
-    if (!searchText) return
-    async function searchMovie() {
-      const resp = await fetch(`${BASE_URL}/?apikey=${API_KEY}&s=${searchText}`)
-      const moviesReponse = await resp.json()
-      console.log('moviesReponse', moviesReponse)
-    }
-
-    searchMovie()
-  }, [searchText])
 
   return (
     <div className="container">
@@ -37,6 +22,7 @@ function App() {
           <input
             placeholder="Forest gump, Fast and furious, Avengers ..."
             type="search"
+            autoComplete="off"
             name="search"
           />
           <button>Search</button>
@@ -44,7 +30,7 @@ function App() {
       </header>
 
       <main>
-        <Movies movies={movies} />
+        <Movies movies={movies} error={error} />
       </main>
     </div>
   )

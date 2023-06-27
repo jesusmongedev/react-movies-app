@@ -2,57 +2,33 @@ import { useState } from 'react'
 import './App.css'
 import Movies from './componentes/Movies'
 import { useMovies } from './hooks/useMovies'
-import { useEffect } from 'react'
-import { useRef } from 'react'
-
-function useSearch() {
-  const [searchText, setSearchText] = useState('')
-  const [error, setError] = useState()
-  const isFirstInput = useRef(true)
-
-  useEffect(() => {
-    if (isFirstInput.current) {
-      isFirstInput.current = searchText === ''
-      return
-    }
-
-    if (searchText === '') {
-      setError('Please enter a movie name')
-      return
-    }
-
-    if (searchText.length < 3) {
-      setError('Please enter at least 3 characters')
-      return
-    }
-
-    setError(null)
-  }, [searchText])
-
-  return { searchText, setSearchText, error }
-}
+import useSearch from './hooks/useSearch'
 
 function App() {
-  const { searchText, setSearchText, error } = useSearch()
+  const { search, setSearch, error } = useSearch()
+  const [sort, setSort] = useState(false)
+
   const {
     movies,
     getMovies,
     loading,
     error: moviesError,
-  } = useMovies(searchText)
+  } = useMovies({ search, sort })
 
   const handleChange = (e) => {
     const { value } = e.target
 
     if (value === ' ') return
 
-    setSearchText(value)
+    setSearch(value)
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
     getMovies()
   }
+
+  const toggleSort = () => setSort((prevSort) => !prevSort)
 
   return (
     <div className="container">
@@ -64,12 +40,23 @@ function App() {
             type="search"
             autoComplete="off"
             name="search"
-            value={searchText}
+            value={search}
             onChange={handleChange}
             style={{ border: error && '1px solid red' }}
           />
           <button>Search</button>
         </form>
+        {/* Input type switch to sort movies by title */}
+        <div>
+          <label htmlFor="sort">Sort by title</label>
+          <input
+            type="checkbox"
+            name="sort"
+            id="sort"
+            onChange={toggleSort}
+            checked={sort}
+          />
+        </div>
         {error && <p className="error">{error}</p>}
         {moviesError && <p className="error">{moviesError}</p>}
       </header>

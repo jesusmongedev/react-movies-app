@@ -34,7 +34,12 @@ function useSearch() {
 
 function App() {
   const { searchText, setSearchText, error } = useSearch()
-  const { movies, error: errorReposinse } = useMovies(searchText)
+  const {
+    movies,
+    getMovies,
+    loading,
+    error: moviesError,
+  } = useMovies(searchText)
 
   const handleChange = (e) => {
     const { value } = e.target
@@ -44,11 +49,16 @@ function App() {
     setSearchText(value)
   }
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    getMovies()
+  }
+
   return (
     <div className="container">
       <header>
         <h1>Movie Search App</h1>
-        <form className="form">
+        <form className="form" onSubmit={handleSubmit}>
           <input
             placeholder="Forest gump, Fast and furious, Avengers ..."
             type="search"
@@ -61,11 +71,10 @@ function App() {
           <button>Search</button>
         </form>
         {error && <p className="error">{error}</p>}
+        {moviesError && <p className="error">{moviesError}</p>}
       </header>
 
-      <main>
-        <Movies movies={movies} error={errorReposinse} />
-      </main>
+      <main>{loading ? <p>Loading...</p> : <Movies movies={movies} />}</main>
     </div>
   )
 }
